@@ -1053,6 +1053,7 @@
   <button id="zoom-out" title="Zoom Out">&minus;</button>
   <button id="zoom-reset" title="Reset View" style="font-size:16px;">&#x27F2;</button>
   <button id="nordics-toggle" class="toggle-btn" title="Toggle Nordics">Nordics</button>
+  <button id="eu-toggle" class="toggle-btn" title="Toggle EU">EU</button>
 </div>
 <div class="zoom-label" id="zoom-label">100%</div>
 <div id="tooltip"></div>
@@ -1097,9 +1098,40 @@
     zoomLabel.textContent = Math.round((fullW / vb.w) * 100) + '%';
   }
 
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function animateTo(target, duration) {
+    var start = { x: vb.x, y: vb.y, w: vb.w, h: vb.h };
+    var startTime = null;
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      var eased = easeInOutCubic(progress);
+
+      vb.x = start.x + (target.x - start.x) * eased;
+      vb.y = start.y + (target.y - start.y) * eased;
+      vb.w = start.w + (target.w - start.w) * eased;
+      vb.h = start.h + (target.h - start.h) * eased;
+
+      svg.setAttribute('viewBox', vb.x + ' ' + vb.y + ' ' + vb.w + ' ' + vb.h);
+      zoomLabel.textContent = Math.round((fullW / vb.w) * 100) + '%';
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
   function resetView() {
-    vb = { x: 0, y: 0, w: fullW, h: fullH };
-    applyViewBox();
+    animateTo({ x: 0, y: 0, w: fullW, h: fullH }, 600);
+  }
+
+  function zoomToRegion(x, y, w, h) {
+    animateTo({ x: x, y: y, w: w, h: h }, 600);
   }
 
   function zoomAt(clientX, clientY, factor) {
@@ -1218,21 +1250,41 @@
   });
   svg.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
 
+  // Region toggle helper
+  function setupRegionToggle(btnId, selectors, regionBox, color) {
+    var active = false;
+    document.getElementById(btnId).addEventListener('click', function() {
+      active = !active;
+      this.classList.toggle('active', active);
+      selectors.forEach(function(sel) {
+        svg.querySelectorAll(sel).forEach(function(el) {
+          el.style.fill = active ? color : '';
+        });
+      });
+      if (active) {
+        zoomToRegion(regionBox.x, regionBox.y, regionBox.w, regionBox.h);
+      } else {
+        resetView();
+      }
+    });
+  }
+
   // Nordics toggle
-  var nordicsActive = false;
-  var nordicSelectors = [
+  setupRegionToggle('nordics-toggle', [
     'path#FI', 'path#SE', 'path#IS',
     'path.Norway', 'path.Denmark'
-  ];
-  document.getElementById('nordics-toggle').addEventListener('click', function() {
-    nordicsActive = !nordicsActive;
-    this.classList.toggle('active', nordicsActive);
-    nordicSelectors.forEach(function(sel) {
-      svg.querySelectorAll(sel).forEach(function(el) {
-        el.style.fill = nordicsActive ? '#22c55e' : '';
-      });
-    });
-  });
+  ], { x: 920, y: 10, w: 210, h: 160 }, '#22c55e');
+
+  // EU toggle
+  setupRegionToggle('eu-toggle', [
+    'path#AT', 'path#BE', 'path#BG', 'path#HR',
+    'path.Cyprus', 'path#CZ', 'path.Denmark', 'path#EE',
+    'path#FI', 'path.France', 'path#DE', 'path.Greece',
+    'path#HU', 'path#IE', 'path.Italy', 'path#LV',
+    'path#LT', 'path#LU', 'path.Malta', 'path#NL',
+    'path#PL', 'path#PT', 'path#RO', 'path#SK',
+    'path#SI', 'path#ES', 'path#SE'
+  ], { x: 930, y: 50, w: 230, h: 250 }, '#3b82f6');
 
   resetView();
 })();
