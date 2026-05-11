@@ -1,0 +1,11 @@
+{
+  "name": "world-map-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w packages/world-map",
+    "dev": "npm run dev -w packages/world-map/example"
+  }
+}
