@@ -70,10 +70,12 @@ export function useCountryDecorations({
     // Build a lookup from code to element for event delegation
     paths.forEach((path) => {
       const el = path as SVGPathElement;
-      const code = resolveCountryCode(el, catalog);
-      if (!code) return;
-
-      el.setAttribute('data-code', code);
+      let code = el.getAttribute('data-code');
+      if (!code) {
+        code = resolveCountryCode(el, catalog);
+        if (!code) return;
+        el.setAttribute('data-code', code);
+      }
       const datum = dataMap[code];
 
       // Apply className
