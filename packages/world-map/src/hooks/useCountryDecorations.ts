@@ -18,7 +18,7 @@ function resolveCountryCode(
   catalog: Catalog,
 ): string | null {
   // Prefer id match
-  const id = el.id;
+  const id = el.getAttribute('id');
   if (id) {
     const found = catalog.countries.find((c) => c.code === id);
     if (found) return found.code;
