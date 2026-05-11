@@ -31,11 +31,23 @@ function resolveCountryCode(
     if (found) return found.code;
   }
 
-  // Then class match
+  // Then class match — supports multi-path countries where SVG class equals name
+  // (e.g. class="France" → finds { code:'FR', name:'France' } without needing className in catalog)
   const cls = el.getAttribute('class');
   if (cls) {
-    const found = catalog.countries.find((c) => c.className === cls);
+    // 1. Explicit className override (exact full-string match)
+    let found = catalog.countries.find((c) => c.className === cls);
     if (found) return found.code;
+
+    // 2. Name match on full class string (handles multi-word names like "Russian Federation")
+    found = catalog.countries.find((c) => c.name === cls);
+    if (found) return found.code;
+
+    // 3. Token match — fallback for when extra CSS classes appear before first data-code stamp
+    for (const token of cls.split(/\s+/).filter(Boolean)) {
+      found = catalog.countries.find((c) => c.className === token || c.name === token);
+      if (found) return found.code;
+    }
   }
 
   return null;

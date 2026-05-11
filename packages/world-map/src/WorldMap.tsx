@@ -325,13 +325,33 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
         dangerouslySetInnerHTML={svgHtml ? { __html: svgHtml } : undefined}
       />
       {controls === 'default' && (
-        <Controls
-          onZoomIn={() => zoomAtCenter(zoomStep)}
-          onZoomOut={() => zoomAtCenter(1 / zoomStep)}
-          onReset={resetView}
-          classNames={classNames}
-          zoomLevel={zoomLevel}
-        />
+        <>
+          <Controls
+            onZoomIn={() => zoomAtCenter(zoomStep)}
+            onZoomOut={() => zoomAtCenter(1 / zoomStep)}
+            onReset={resetView}
+            classNames={classNames}
+          />
+          <div
+            className={classNames?.zoomLabel}
+            style={{
+              position: 'absolute',
+              bottom: 24,
+              left: 24,
+              background: 'rgba(255,255,255,0.88)',
+              color: '#1a1a2e',
+              padding: '6px 14px',
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}
+          >
+            {zoomLevel}
+          </div>
+        </>
       )}
       {controls !== 'default' && controls !== 'none' && controls}
       {tooltipCtx && renderTooltip !== null && (

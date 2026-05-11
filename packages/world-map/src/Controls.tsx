@@ -5,7 +5,6 @@ interface ControlsProps {
   onZoomOut: () => void;
   onReset: () => void;
   classNames?: WorldMapClassNames;
-  zoomLevel?: string;
 }
 
 export function Controls({
@@ -13,7 +12,6 @@ export function Controls({
   onZoomOut,
   onReset,
   classNames,
-  zoomLevel,
 }: ControlsProps) {
   const btnClass = classNames?.controlButton;
 
@@ -54,26 +52,6 @@ export function Controls({
       >
         &#x27F2;
       </button>
-      {zoomLevel && (
-        <div
-          className={classNames?.zoomLabel}
-          style={{
-            position: 'absolute',
-            bottom: 24,
-            left: 24,
-            background: 'rgba(255,255,255,0.88)',
-            color: '#1a1a2e',
-            padding: '6px 14px',
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: 500,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-            zIndex: 10,
-          }}
-        >
-          {zoomLevel}
-        </div>
-      )}
     </div>
   );
 }

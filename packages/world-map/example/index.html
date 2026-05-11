@@ -6,13 +6,14 @@
     <title>World Map Example</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body, #root { height: 100%; }
+      html { height: 100%; }
+      body, #root { height: 100svh; overflow: hidden; }
       body {
         background: #1a1a2e;
         font-family: system-ui, sans-serif;
       }
       .wm-active {
-        fill: #3b82f6 !important;
+        fill: #3b82f6;
         stroke: #93c5fd !important;
         stroke-width: 1 !important;
       }
