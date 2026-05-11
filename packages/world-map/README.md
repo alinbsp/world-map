@@ -131,15 +131,50 @@ The component matches SVG `<path>` elements to catalog entries using three strat
 
 Your catalog must include whichever attribute the SVG uses for each country.
 
-## Vendored / Drop-in Usage
+## Source Integration (Fork & Customize)
 
-Copy `dist/` into your project and import directly:
+If you want to own and modify the component, copy the **source** into your codebase instead of installing the package. The source has no internal dependencies beyond `react` / `react-dom`, so it compiles with whatever bundler you already use (Vite, Next.js, CRA, etc.).
 
-```tsx
-import { WorldMap } from './vendor/world-map/index.js';
+### 1. Copy the source
+
+Copy everything under [packages/world-map/src/](packages/world-map/src/) into your project, e.g. `src/components/world-map/`:
+
+```
+src/components/world-map/
+├── index.ts
+├── WorldMap.tsx
+├── Controls.tsx
+├── Tooltip.tsx
+├── types.ts
+└── hooks/
+    ├── useCountryDecorations.ts
+    ├── useKeyboardZoom.ts
+    ├── usePanZoom.ts
+    ├── useSvgLoader.ts
+    └── useViewBox.ts
 ```
 
-No build step required — the ESM output works in any modern bundler.
+### 2. Install peer deps
+
+Your host project needs:
+
+- `react >= 18`, `react-dom >= 18`
+- TypeScript (optional, but recommended — the source is `.tsx`)
+
+No other runtime dependencies. You can delete `package.json`, `vite.config.ts`, and `tsconfig.json` from the copied folder — those belong to the library build, not the source itself.
+
+### 3. Add the SVG asset
+
+Place a standalone `world.svg` in your static/public folder and pass its URL via the `svgUrl` prop. A ready-to-use file lives at the repo root (`world.svg`).
+
+### 4. Import from the local path
+
+```tsx
+import { WorldMap } from '@/components/world-map';
+import type { Catalog, CountryDatum, WorldMapHandle } from '@/components/world-map';
+```
+
+Everything is now yours — edit `WorldMap.tsx`, tweak the hooks, change the resolver in `useCountryDecorations.ts`, or replace `Controls.tsx` with your own UI.
 
 ## Playground
 
