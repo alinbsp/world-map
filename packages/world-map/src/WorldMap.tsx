@@ -120,6 +120,13 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     svgContainerRef: panZoomRef,
   });
 
+  // Apply viewBox to SVG element
+  useEffect(() => {
+    const el = svgLoaderRef.current?.querySelector('svg');
+    if (!el) return;
+    el.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+  }, [viewBox, svgLoaderRef]);
+
   // Tooltip state
   const [tooltipCtx, setTooltipCtx] = useState<TooltipContext | null>(null);
 
@@ -174,7 +181,11 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     (code: string, opts?: ZoomToOpts) => {
       const country = catalog.countries.find((c) => c.code === code);
       if (!country) return;
-      animateTo({ x: 800, y: 100, w: 400, h: 300 }, opts?.animationMs);
+      if (country.viewBox) {
+        animateTo(country.viewBox, opts?.animationMs);
+      } else {
+        animateTo({ x: 800, y: 100, w: 400, h: 300 }, opts?.animationMs);
+      }
     },
     [catalog, animateTo],
   );

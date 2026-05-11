@@ -4,6 +4,7 @@ export interface Country {
   code: string;
   name?: string;
   className?: string;
+  viewBox?: { x: number; y: number; w: number; h: number };
 }
 
 export interface Region {
