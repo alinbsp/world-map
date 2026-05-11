@@ -10,6 +10,7 @@ interface UseCountryDecorationsOptions {
   onCountryHover?: (code: string, datum: CountryDatum | undefined, event: React.MouseEvent<SVGElement>) => void;
   svgContainerRef: React.RefObject<HTMLDivElement | null>;
   activeCodes?: Set<string>;
+  svgLoaded?: boolean;
 }
 
 function resolveCountryCode(
@@ -49,6 +50,7 @@ export function useCountryDecorations({
   onCountryHover,
   svgContainerRef,
   activeCodes,
+  svgLoaded,
 }: UseCountryDecorationsOptions) {
   const hoverRef = useRef<string | null>(null);
   const clickHandlerRef = useRef(onCountryClick);
@@ -104,7 +106,7 @@ export function useCountryDecorations({
       }
       el.setAttribute('class', withoutActive.join(' '));
     });
-  }, [catalog, data, getCountryClassName, getCountryStyle, svgContainerRef, activeCodes]);
+  }, [catalog, data, getCountryClassName, getCountryStyle, svgContainerRef, activeCodes, svgLoaded]);
 
   // Re-run decoration when dependencies change
   useEffect(() => {

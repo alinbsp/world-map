@@ -4,6 +4,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from 'react';
@@ -87,6 +88,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
   );
 
   const resetView = useCallback(() => {
+    activeRegionRef.current = null;
     setActiveRegionCodes(new Set());
     animateTo({ x: 0, y: 0, w: fullW, h: fullH });
   }, [animateTo, fullW, fullH]);
@@ -141,6 +143,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
 
   // Active region highlighting
   const [activeRegionCodes, setActiveRegionCodes] = useState<Set<string>>(new Set());
+  const activeRegionRef = useRef<string | null>(null);
 
   useCountryDecorations({
     catalog,
@@ -151,6 +154,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     onCountryHover,
     svgContainerRef: panZoomRef,
     activeCodes: activeRegionCodes,
+    svgLoaded: !!svgHtml,
   });
 
   // Apply viewBox to SVG element
@@ -228,8 +232,15 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
 
   const zoomToRegion = useCallback(
     (regionId: string, opts?: ZoomToOpts) => {
+      if (regionId === activeRegionRef.current) {
+        activeRegionRef.current = null;
+        setActiveRegionCodes(new Set());
+        animateTo({ x: 0, y: 0, w: fullW, h: fullH }, opts?.animationMs);
+        return;
+      }
       const region = catalog.regions.find((r) => r.id === regionId);
       if (!region) return;
+      activeRegionRef.current = regionId;
       setActiveRegionCodes(new Set(region.memberCodes));
       if (region.viewBox) {
         animateTo(region.viewBox, opts?.animationMs);
@@ -240,7 +251,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
         }
       }
     },
-    [catalog, animateTo, computeViewBoxForCodes],
+    [catalog, animateTo, computeViewBoxForCodes, fullW, fullH],
   );
 
   const zoomToBox = useCallback(
@@ -252,6 +263,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
 
   const reset = useCallback(
     (opts?: ZoomToOpts) => {
+      activeRegionRef.current = null;
       setActiveRegionCodes(new Set());
       animateTo({ x: 0, y: 0, w: fullW, h: fullH }, opts?.animationMs);
     },
