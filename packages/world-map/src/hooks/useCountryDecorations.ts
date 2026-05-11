@@ -9,6 +9,7 @@ interface UseCountryDecorationsOptions {
   onCountryClick?: (code: string, datum: CountryDatum | undefined, event: React.MouseEvent<SVGElement>) => void;
   onCountryHover?: (code: string, datum: CountryDatum | undefined, event: React.MouseEvent<SVGElement>) => void;
   svgContainerRef: React.RefObject<HTMLDivElement | null>;
+  activeCodes?: Set<string>;
 }
 
 function resolveCountryCode(
@@ -47,6 +48,7 @@ export function useCountryDecorations({
   onCountryClick,
   onCountryHover,
   svgContainerRef,
+  activeCodes,
 }: UseCountryDecorationsOptions) {
   const hoverRef = useRef<string | null>(null);
   const clickHandlerRef = useRef(onCountryClick);
@@ -92,8 +94,17 @@ export function useCountryDecorations({
           Object.assign(el.style, style);
         }
       }
+
+      // Apply active region highlight
+      const currentCls = el.getAttribute('class') || '';
+      const parts = currentCls.split(/\s+/).filter(Boolean);
+      const withoutActive = parts.filter((p) => p !== 'wm-active');
+      if (activeCodes?.has(code)) {
+        withoutActive.push('wm-active');
+      }
+      el.setAttribute('class', withoutActive.join(' '));
     });
-  }, [catalog, data, getCountryClassName, getCountryStyle, svgContainerRef]);
+  }, [catalog, data, getCountryClassName, getCountryStyle, svgContainerRef, activeCodes]);
 
   // Re-run decoration when dependencies change
   useEffect(() => {

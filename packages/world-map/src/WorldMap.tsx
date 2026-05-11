@@ -86,6 +86,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
   );
 
   const resetView = useCallback(() => {
+    setActiveRegionCodes(new Set());
     animateTo({ x: 0, y: 0, w: fullW, h: fullH });
   }, [animateTo, fullW, fullH]);
 
@@ -110,6 +111,9 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     resetView,
   });
 
+  // Active region highlighting
+  const [activeRegionCodes, setActiveRegionCodes] = useState<Set<string>>(new Set());
+
   useCountryDecorations({
     catalog,
     data,
@@ -118,6 +122,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     onCountryClick,
     onCountryHover,
     svgContainerRef: panZoomRef,
+    activeCodes: activeRegionCodes,
   });
 
   // Apply viewBox to SVG element
@@ -194,6 +199,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     (regionId: string, opts?: ZoomToOpts) => {
       const region = catalog.regions.find((r) => r.id === regionId);
       if (!region) return;
+      setActiveRegionCodes(new Set(region.memberCodes));
       if (region.viewBox) {
         animateTo(region.viewBox, opts?.animationMs);
       } else {
@@ -212,6 +218,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
 
   const reset = useCallback(
     (opts?: ZoomToOpts) => {
+      setActiveRegionCodes(new Set());
       animateTo({ x: 0, y: 0, w: fullW, h: fullH }, opts?.animationMs);
     },
     [animateTo, fullW, fullH],
