@@ -64,6 +64,7 @@ export interface WorldMapProps {
   maxZoom?: number;
   zoomStep?: number;
   animationMs?: number;
+  regionPadding?: number;
   interactions?: Interactions;
 }
 

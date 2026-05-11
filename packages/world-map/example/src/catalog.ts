@@ -172,7 +172,6 @@ export const catalog: Catalog = {
       id: 'nordics',
       name: 'Nordics',
       memberCodes: ['FI', 'SE', 'IS', 'Norway', 'Denmark'],
-      viewBox: { x: 828, y: 8, w: 350 },
     },
     {
       id: 'eu',
@@ -183,7 +182,6 @@ export const catalog: Catalog = {
         'LT', 'LU', 'Malta', 'NL', 'PL', 'PT', 'RO', 'SK',
         'SI', 'ES', 'SE',
       ],
-      viewBox: { x: 780, y: 60, w: 520 },
     },
   ],
 };

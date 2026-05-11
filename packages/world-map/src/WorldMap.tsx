@@ -41,6 +41,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     maxZoom,
     zoomStep = 1.25,
     animationMs = 600,
+    regionPadding = 0.2,
     interactions,
   },
   ref,
@@ -89,6 +90,33 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     setActiveRegionCodes(new Set());
     animateTo({ x: 0, y: 0, w: fullW, h: fullH });
   }, [animateTo, fullW, fullH]);
+
+  const computeViewBoxForCodes = useCallback(
+    (codes: string[]): { x: number; y: number; w: number; h: number } | null => {
+      const container = panZoomRef.current;
+      if (!container) return null;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      let found = false;
+      for (const code of codes) {
+        const paths = container.querySelectorAll(`path[data-code="${code}"]`);
+        for (const path of paths) {
+          const bbox = (path as SVGPathElement).getBBox();
+          minX = Math.min(minX, bbox.x);
+          minY = Math.min(minY, bbox.y);
+          maxX = Math.max(maxX, bbox.x + bbox.width);
+          maxY = Math.max(maxY, bbox.y + bbox.height);
+          found = true;
+        }
+      }
+      if (!found) return null;
+      const w = maxX - minX;
+      const h = maxY - minY;
+      const padX = w * regionPadding;
+      const padY = h * regionPadding;
+      return { x: minX - padX, y: minY - padY, w: w + padX * 2, h: h + padY * 2 };
+    },
+    [regionPadding],
+  );
 
   const { containerRef: panZoomRef } = usePanZoom({
     enabled: {
@@ -189,10 +217,13 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
       if (country.viewBox) {
         animateTo(country.viewBox, opts?.animationMs);
       } else {
-        animateTo({ x: 800, y: 100, w: 400, h: 300 }, opts?.animationMs);
+        const vb = computeViewBoxForCodes([code]);
+        if (vb) {
+          animateTo(vb, opts?.animationMs);
+        }
       }
     },
-    [catalog, animateTo],
+    [catalog, animateTo, computeViewBoxForCodes],
   );
 
   const zoomToRegion = useCallback(
@@ -203,10 +234,13 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
       if (region.viewBox) {
         animateTo(region.viewBox, opts?.animationMs);
       } else {
-        zoomToCountry(region.memberCodes[0], opts);
+        const vb = computeViewBoxForCodes(region.memberCodes);
+        if (vb) {
+          animateTo(vb, opts?.animationMs);
+        }
       }
     },
-    [catalog, animateTo, zoomToCountry],
+    [catalog, animateTo, computeViewBoxForCodes],
   );
 
   const zoomToBox = useCallback(
